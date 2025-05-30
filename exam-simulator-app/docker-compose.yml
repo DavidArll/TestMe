@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  expo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: exam-simulator-app-dev
+    container_name: exam_simulator_container
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8081:8081"
+    volumes:
+      # Mount the entire current directory to /app in the container
+      - .:/app
+      # Use an anonymous volume to make node_modules in the container persist
+      # and not be overwritten by the host's (potentially empty or different) node_modules directory.
+      # This ensures that the node_modules installed during the Docker build are used.
+      - /app/node_modules
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - EXPO_METRO_LISTEN_ADDRESS=0.0.0.0
+      - EXPO_WEB_LISTEN_ADDRESS=0.0.0.0
+      # When using --tunnel, REACT_NATIVE_PACKAGER_HOSTNAME is generally not needed
+      # as connections are routed through Expo's servers.
+
+    # Keep the terminal interactive, needed for Expo CLI prompts
+    stdin_open: true
+    tty: true
+
+# No need to define 'volumes:' at the top level if using anonymous volume for node_modules like this.
+# If we were using a named volume 'expo_node_modules', then we would define it here:
+# volumes:
+#   expo_node_modules:
