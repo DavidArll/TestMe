@@ -10,6 +10,7 @@ services:
       - "19001:19001"
       - "19002:19002"
       - "8081:8081"
+      - "19006:19006" 
     volumes:
       # Mount the entire current directory to /app in the container
       - .:/app
@@ -21,7 +22,7 @@ services:
       - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
       - EXPO_METRO_LISTEN_ADDRESS=0.0.0.0
       - EXPO_WEB_LISTEN_ADDRESS=0.0.0.0
-      - CI=true  # Esto hace que Expo no haga prompts interactivos
+      #- CI=true  # Esto hace que Expo no haga prompts interactivos
       # When using --tunnel, REACT_NATIVE_PACKAGER_HOSTNAME is generally not needed
       # as connections are routed through Expo's servers.
 
