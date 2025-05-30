@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Node modules
+node_modules
+
+# Expo specific cache/build directories
+.expo
+.expo-shared
+
+# NPM specific log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Optional: Add build output directories if you ever eject or build locally
+# /android/build
+# /ios/build
+# /web-build
