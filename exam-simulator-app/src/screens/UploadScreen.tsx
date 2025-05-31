@@ -1,25 +1,23 @@
 // src/screens/UploadScreen.tsx
 import React, { useState, useContext } from 'react';
-import { View, Alert, ActivityIndicator, Platform } from 'react-native'; // Added Platform
+import { View, Alert, ActivityIndicator, Platform } from 'react-native';
 import styled from 'styled-components/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { ThemeContext, Theme } from '../context/ThemeContext'; // Import Theme
-import { Exam } from '../types/exam'; // Ensure this path is correct
+import { ThemeContext, Theme } from '../context/ThemeContext'; // Theme is imported
+import { Exam } from '../types/exam';
 import Ajv, { ErrorObject } from 'ajv';
 import { examSchema } from '../lib/examSchema';
 
-// Define styled components here (Container, TitleText, StyledButton, StatusText)
-
 const UploadScreen = () => {
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext); // theme is in scope here
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
 
-  // Styled components definitions (using theme)
+  // Define styled components that need this 'theme' here
   const Container = styled.View`
     flex: 1;
     justify-content: center;
@@ -40,10 +38,14 @@ const UploadScreen = () => {
     margin-bottom: 20px;
   `;
 
-  const ButtonText = styled.Text<{ theme: Theme }>`
-    color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-                     ? '#FFFFFF'
-                     : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF')};
+  // Corrected ButtonText definition using lexical theme
+  const ButtonText = styled.Text`
+    color: ${(props) => { // props here are the Text component's own props, not { theme: ... }
+        // Logic for color based on the lexically available 'theme' object
+        return (theme.primary === theme.background && theme.mode === 'dark')
+               ? '#FFFFFF'
+               : (theme.mode === 'dark' ? theme.background : '#FFFFFF');
+    }};
     font-size: 16px;
     font-weight: bold;
   `;
@@ -60,7 +62,7 @@ const UploadScreen = () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/json',
-        copyToCacheDirectory: true, // Important for FileSystem access
+        copyToCacheDirectory: true,
       });
 
       if (result.canceled) {
@@ -77,7 +79,6 @@ const UploadScreen = () => {
         setStatusMessage('Reading file...');
 
         if (Platform.OS === 'web' && asset.file) {
-          // Web platform: Use FileReader API
           try {
             fileContent = await new Promise<string>((resolve, reject) => {
               const reader = new FileReader();
@@ -91,7 +92,7 @@ const UploadScreen = () => {
               reader.onerror = () => {
                 reject(reader.error || new Error('Unknown FileReader error'));
               };
-              reader.readAsText(asset.file); // asset.file is the File object on web
+              reader.readAsText(asset.file);
             });
           } catch (webReadError: any) {
             console.error("Web file read error:", webReadError);
@@ -101,7 +102,6 @@ const UploadScreen = () => {
             return;
           }
         } else if (asset.uri) {
-          // Mobile platforms: Use FileSystem.readAsStringAsync
           try {
             fileContent = await FileSystem.readAsStringAsync(asset.uri);
           } catch (mobileReadError: any) {
@@ -119,7 +119,6 @@ const UploadScreen = () => {
         }
 
         if (fileContent === null) {
-          // This case should ideally be caught by specific errors above, but as a fallback:
           Alert.alert('Error', 'File content could not be read.');
           setStatusMessage('Error: Failed to read file content.');
           setIsLoading(false);
@@ -145,7 +144,7 @@ const UploadScreen = () => {
             let path = err.instancePath.substring(1).replace(/\//g, '.');
             if (path === '') path = 'Exam data (root)';
             else if (err.instancePath.startsWith('/questions')) path = `questions${err.instancePath.substring('/questions'.length).replace(/\//g, '.')}`;
-            else path = path.replace(/^questions\.(\d+)\.(options|answerKey|question|type|id)$/, 'questions[$1].$2'); // Prettify common paths
+            else path = path.replace(/^questions\.(\d+)\.(options|answerKey|question|type|id)$/, 'questions[$1].$2');
             return `${path}: ${err.message}`;
           }).join('\n');
 
@@ -175,7 +174,6 @@ const UploadScreen = () => {
             }
         }
 
-        // Add a unique ID to the exam
         const examWithId: Exam = { ...validatedExam, id: Date.now().toString() };
 
         setStatusMessage('Saving exam...');
@@ -187,7 +185,7 @@ const UploadScreen = () => {
 
         setStatusMessage('Exam uploaded successfully!');
         Alert.alert('Success', 'Exam uploaded and saved!');
-        navigation.navigate('ExamList'); // Ensure 'ExamList' is a valid route name
+        navigation.navigate('ExamList');
       }
     } catch (error: any) {
       console.error(error);
@@ -205,7 +203,7 @@ const UploadScreen = () => {
         <ButtonText>Select JSON File</ButtonText>
       </StyledButton>
       {isLoading && <ActivityIndicator size="large" color={theme.primary} />}
-      {statusMessage && <StatusText>{statusMessage}</StatusText>}
+      {statusMessage ? <StatusText>{statusMessage}</StatusText> : null}
     </Container>
   );
 };
