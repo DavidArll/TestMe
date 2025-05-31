@@ -2,95 +2,96 @@
 import { JSONSchemaType } from 'ajv';
 import { Exam, Question, LangSpecificText, OptionValue } from '../types/exam';
 
-const multilingualTextSchema = {
+// Helper for multilingual text schema (string or object with language keys)
+const multilingualTextSchema: JSONSchemaType<string | LangSpecificText> = {
   oneOf: [
-    { type: "string" },
-    {
+    { type: "string", minLength: 0 }, // Allow empty string for translations not yet filled
+    { 
       type: "object",
       additionalProperties: { type: "string" },
-      minProperties: 1,
+      minProperties: 1, // Must have at least one language if it's an object
+      required: [] // No specific language codes are universally required beforehand
     }
   ]
 };
 
-const questionOptionsSchema = {
+// Helper for options schema
+const questionOptionsSchema: JSONSchemaType<OptionValue[] | { [langKey: string]: string[] } | null> = {
   oneOf: [
-    {
+    { // Array of OptionValue (string or LangSpecificText)
       type: "array",
       items: {
         oneOf: [
           { type: "string" },
-          {
+          { 
             type: "object",
             additionalProperties: { type: "string" },
             minProperties: 1,
+            required: []
           }
         ]
-      },
-      // minItems: 1 // A multiple choice question should have at least one option. Applied in custom validation.
+      } as JSONSchemaType<OptionValue> // Added cast here
     },
-    {
-      type: "object", // For multilingual options like { "en": ["Option 1"], "es": ["Opción 1"] }
+    { // Object with language keys pointing to string arrays (as per example JSON)
+      type: "object",
       additionalProperties: {
         type: "array",
         items: { type: "string" }
-        // minItems: 1 // Each language array should also have options. Applied in custom validation.
       },
-      minProperties: 1, // At least one language must be provided.
-    }
+      minProperties: 1,
+      required: []
+    },
+    { type: "null" } // Explicitly allow null for options
   ]
 };
+
 
 export const examSchema: JSONSchemaType<Exam> = {
   type: "object",
   properties: {
-    id: { type: "string", nullable: true }, // ID is assigned by app, so nullable for uploaded file
+    // ID is added by app, so schema should reflect its state in the JSON file (optional)
+    id: { type: "string", nullable: true, minLength: 1 }, 
     title: { type: "string", minLength: 1 },
     language: {
       type: "object",
-      nullable: true,
+      nullable: true, // language object itself can be null/absent
       properties: {
         primary: { type: "string", minLength: 1 },
-        secondary: { type: "string", minLength: 1, nullable: true }
+        secondary: { type: "string", nullable: true, minLength: 1 } // secondary can be null/absent
       },
       required: ["primary"]
     },
-    includeAnswerKey: { type: "boolean", nullable: true },
+    includeAnswerKey: { type: "boolean", nullable: true }, // Can be null/absent
     questions: {
       type: "array",
-      minItems: 1, // An exam must have at least one question
+      minItems: 1,
       items: {
         type: "object",
         properties: {
-          id: { oneOf: [{type: "string", minLength: 1}, {type: "number"}] }, // Allow string or number for question ID
+          id: { oneOf: [{type: "string", minLength: 1}, {type: "number"}] },
           type: { enum: ["multiple-choice", "open-ended"] },
+          domain: { type: "string", nullable: true, minLength: 1 }, // Added domain, can be null/absent or empty if not desired
           question: multilingualTextSchema,
-          options: {
-            ...questionOptionsSchema,
-            nullable: true // Options are only required for 'multiple-choice' type, handled by custom validation logic
-          },
-          answerKey: { // answerKey can be string or multilingual object
+          // Options are nullable and their schema already handles being null via oneOf
+          options: questionOptionsSchema, 
+          answerKey: { // answerKey can be string, LangSpecificText, or null/absent
              oneOf: [
-                { type: "string" },
-                {
+                { type: "string", minLength: 1 }, // minLength 1 if string answerKey
+                { 
                     type: "object",
                     additionalProperties: { type: "string" },
                     minProperties: 1,
-                }
-             ],
-             nullable: true
-          },
-          // 'explanation' field is not explicitly defined in the schema here,
-          // but `additionalProperties: true` on the main schema allows it.
-          // If explanation needs specific validation, it should be added.
-          // For now, relying on the `Question` type in `../types/exam` which has `explanation?: string | LangSpecificText;`
+                    required: []
+                },
+                { type: "null" } // Explicitly allow null
+             ]
+          }
         },
         required: ["id", "type", "question"],
-        // Cast to any because Question type has explanation? which is not in properties here.
-        // AJV will validate against defined properties and allow others if additionalProperties is not false.
-      } as any
+        additionalProperties: true // Allow other fields like 'domain' if not explicitly listed, or future fields
+      } as JSONSchemaType<Question> 
     }
   },
   required: ["title", "questions"],
-  additionalProperties: true // Allow other properties like 'explanation' at question level, or other top-level exam properties
+  additionalProperties: true 
 };
