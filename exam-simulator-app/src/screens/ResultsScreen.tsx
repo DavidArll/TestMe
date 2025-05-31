@@ -108,8 +108,20 @@ const StyledButton = styled.TouchableOpacity<{ theme: Theme; secondary?: boolean
   align-items: center;
   min-width: 120px;
 `;
-const ButtonText = styled.Text<{ theme: Theme; secondary?: boolean, disabled?: boolean }>` // Added disabled
-  color: ${props => props.secondary ? props.theme.primary : (props.disabled ? props.theme.textMuted : props.theme.buttonText)};
+const ButtonText = styled.Text<{ theme: Theme; secondary?: boolean; disabled?: boolean }>`
+  color: ${props => {
+    if (props.secondary) {
+      return props.theme.primary; // For secondary button, text is primary color
+    }
+    if (props.disabled) {
+      return props.theme.textMuted; // For disabled button, text is muted
+    }
+    // For primary, non-disabled button, text should contrast with theme.primary background
+    // This logic is similar to other ButtonText components (e.g., UploadScreen)
+    return (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
+           ? '#FFFFFF'
+           : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF');
+  }};
   font-size: 16px;
   font-weight: bold;
 `;
