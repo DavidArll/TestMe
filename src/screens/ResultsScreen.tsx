@@ -138,7 +138,11 @@ const ResultsScreen = () => {
   const navigation = useNavigation<ResultsScreenNavigationProp>();
   const route = useRoute<ResultsScreenRouteProp>();
 
+  console.log('[ResultsScreen] Received route params:', JSON.stringify(route.params, null, 2));
+
+  // Handle case where params might be undefined if navigated to incorrectly
   if (!route.params) {
+    console.error('[ResultsScreen] Error: route.params is undefined!');
       return (
           <StyledContainer backgroundColor={theme.background}>
               <ContentPadding>
@@ -151,7 +155,20 @@ const ResultsScreen = () => {
           </StyledContainer>
       );
   }
-  const { exam, userAnswers, duration } = route.params;
+
+  const { exam, userAnswers, duration } = route.params; // Assuming params are guaranteed by navigation call (already checked by !route.params)
+
+  console.log('[ResultsScreen] Destructured exam title:', JSON.stringify(exam?.title));
+  console.log('[ResultsScreen] Destructured userAnswers keys:', JSON.stringify(userAnswers ? Object.keys(userAnswers) : null));
+  console.log('[ResultsScreen] Destructured duration:', duration);
+
+  // Add a specific check for critical data needed for rendering:
+  if (!exam || !exam.questions || !userAnswers || typeof duration === 'undefined') {
+      console.error('[ResultsScreen] Critical data missing after destructuring. Exam:', !!exam, 'Questions:', !!exam?.questions, 'UserAnswers:', !!userAnswers, 'Duration Defined:', typeof duration !== 'undefined');
+      // Optionally, you could set an error state here to render a message to the user.
+      // For now, the console error is the primary goal for debugging.
+      // The existing UI might show minimal info or crash, this log helps identify why.
+  }
 
   const primaryLang = exam.language?.primary || 'en';
   const secondaryLang = exam.language?.secondary;

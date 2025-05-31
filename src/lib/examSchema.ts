@@ -6,7 +6,7 @@ import { Exam, Question, LangSpecificText, OptionValue } from '../types/exam';
 const multilingualTextSchema: JSONSchemaType<string | LangSpecificText> = {
   oneOf: [
     { type: "string", minLength: 0 }, // Allow empty string for translations not yet filled
-    { 
+    {
       type: "object",
       additionalProperties: { type: "string" },
       minProperties: 1, // Must have at least one language if it's an object
