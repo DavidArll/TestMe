@@ -261,54 +261,114 @@ const ResultsScreen = () => {
 
   const exportToFile = async (format: 'json' | 'csv') => {
     try {
-      const resultsExportData = {
-        examTitle: exam.title,
-        examDate: new Date().toISOString(),
-        durationFormatted: formatDuration(duration),
-        durationMs: duration,
-        score: scoreData ? `${scoreData.correct}/${scoreData.total}` : (exam.includeAnswerKey ? '0/0' : 'Not Scored'),
-        questions: exam.questions.map((question, index) => {
-          const userAnswerValue = userAnswers[question.id.toString()];
-          return {
-            id: question.id.toString(),
-            questionNumber: index + 1,
-            questionText: getLangSpecificText(question.question, primaryLang),
-            userAnswer: getLangSpecificText(userAnswerValue, primaryLang, secondaryLang) || "Not Answered",
-            correctAnswer: (exam.includeAnswerKey && question.answerKey) ? getLangSpecificText(question.answerKey, primaryLang) : 'N/A',
-            status: getStatusForExport(question, userAnswerValue),
-          };
-        }),
-      };
-
       let contentString: string;
       let fileName: string;
       let mimeType: string;
-
       const safeExamTitle = exam.title.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '');
       const dateSuffix = new Date().toISOString().split('T')[0];
 
       if (format === 'json') {
-        contentString = JSON.stringify(resultsExportData, null, 2);
+        // Create a deep copy of the original exam object to avoid modifying the state version
+        const examCopy: Exam = JSON.parse(JSON.stringify(exam));
+
+        // Add user answers to each question in the copy
+        examCopy.questions.forEach(question => {
+          const userAnswerValue = userAnswers[question.id.toString()];
+          // Add the user's answer to the question object.
+          // We store the raw userAnswerValue (which can be string or LangSpecificText for MCQs)
+          // This preserves the original answer structure if it was complex.
+          // @ts-ignore because we are dynamically adding a property
+          question.userProvidedAnswer = userAnswerValue !== undefined ? userAnswerValue : null;
+        });
+
+        // Prepare the final export object
+        const exportData = {
+          ...examCopy, // Spread the modified exam copy (includes title, language, questions with answers)
+          resultSummary: {
+            examDate: new Date().toISOString(),
+            durationFormatted: formatDuration(duration), // Assuming formatDuration is available
+            durationMs: duration,
+            score: scoreData ? `${scoreData.correct}/${scoreData.total}` : 'Not Scored',
+            // Could also include a summary of statuses per question if desired, but keep simple for now
+          }
+        };
+
+        contentString = JSON.stringify(exportData, null, 2);
         fileName = `${safeExamTitle}_results_${dateSuffix}.json`;
         mimeType = 'application/json';
-      } else {
-        contentString = convertResultsToCsv(resultsExportData);
-        fileName = `${safeExamTitle}_results_${dateSuffix}.csv`;
-        mimeType = 'text/csv';
+
+      } else { // CSV format - current logic for CSV can remain or be adjusted if needed
+          // For now, let's assume the existing CSV data structure is acceptable.
+          // If CSV also needs to change significantly, that would be a separate detailed requirement.
+          // The existing CSV preparation code:
+          const csvOutputData = {
+              examTitle: exam.title,
+              examDate: new Date().toISOString(),
+              durationFormatted: formatDuration(duration),
+              durationMs: duration,
+              score: scoreData ? `${scoreData.correct}/${scoreData.total}` : (exam.includeAnswerKey ? '0/0' : 'Not Scored'),
+              questions: exam.questions.map((question, index) => {
+                const userAnswerValue = userAnswers[question.id.toString()];
+                return {
+                  id: question.id.toString(),
+                  questionNumber: index + 1,
+                  questionText: getLangSpecificText(question.question, primaryLang, primaryLang),
+                  userAnswer: getLangSpecificText(userAnswerValue, primaryLang, primaryLang) || "Not Answered",
+                  correctAnswer: (exam.includeAnswerKey && question.answerKey) ? getLangSpecificText(question.answerKey, primaryLang, primaryLang) : 'N/A',
+                  status: getStatusForExport(question, userAnswerValue), // Assuming getStatusForExport is available
+                };
+              }),
+          };
+          contentString = convertResultsToCsv(csvOutputData); // Assuming convertResultsToCsv is available
+          fileName = `${safeExamTitle}_results_${dateSuffix}.csv`;
+          mimeType = 'text/csv';
       }
 
-      const fileUri = (FileSystem.documentDirectory || FileSystem.cacheDirectory || '') + fileName;
-
-      await FileSystem.writeAsStringAsync(fileUri, contentString, { encoding: FileSystem.EncodingType.UTF8 });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, { mimeType, dialogTitle: `Share ${exam.title} Results` });
+      // Platform-specific export logic starts here
+      if (Platform.OS === 'web') {
+        // Web platform: Implement direct browser download
+        try {
+          const blob = new Blob([contentString], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a); // Append to body for compatibility
+          a.click();
+          document.body.removeChild(a); // Clean up the anchor element
+          URL.revokeObjectURL(url); // Clean up the object URL
+          console.log('Web download initiated for:', fileName);
+          // Alert.alert('Download Started', `${fileName} should begin downloading shortly.`); // Optional: User feedback
+        } catch (webDownloadError: any) {
+          console.error("Web download error:", webDownloadError);
+          Alert.alert("Download Error", `Failed to download file on web: ${webDownloadError.message}`);
+        }
       } else {
-        Alert.alert("Share Results", `Results saved to: ${fileUri}\n\nSharing is not available on this device, but you can find the file in your app's documents directory if your OS allows.`);
+        // Mobile platforms: Use FileSystem and Sharing logic
+        try {
+          const fileUri = (FileSystem.documentDirectory || FileSystem.cacheDirectory || '') + fileName;
+          if (!FileSystem.documentDirectory && !FileSystem.cacheDirectory) {
+              console.error('File system directories are not available.');
+              Alert.alert('Export Error', 'File system access is not available on this device.');
+              return; // Exit if no valid directory
+          }
+          await FileSystem.writeAsStringAsync(fileUri, contentString, { encoding: FileSystem.EncodingType.UTF8 });
+
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(fileUri, { mimeType, dialogTitle: `Share ${exam.title} Results` });
+          } else {
+            Alert.alert("Share Results", `Results file saved. Sharing not available on this device. You may find it at: ${fileUri}`);
+          }
+        } catch (mobileExportError: any) {
+          console.error("Mobile Export Error: ", mobileExportError);
+          Alert.alert("Export Error", `Failed to export results on mobile: ${mobileExportError.message}`);
+        }
       }
-    } catch (error: any) {
-      console.error("Export Error: ", error);
-      Alert.alert("Export Error", `Failed to export results: ${error.message}`);
+      // The original outer try...catch is removed as specific catches are now in place.
+      // If a more general catch is needed for logic outside web/mobile paths (e.g. data prep), it would be placed around that.
+    } catch (error: any) { // This catch now primarily handles errors from data preparation stage if any
+        console.error("General Export Preparation Error: ", error);
+        Alert.alert("Export Preparation Error", `Failed to prepare data for export: ${error.message}`);
     }
   };
 
