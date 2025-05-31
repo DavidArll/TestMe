@@ -1,6 +1,6 @@
 // src/screens/UploadScreen.tsx
 import React, { useState, useContext } from 'react';
-import { View, Alert, ActivityIndicator } from 'react-native';
+import { View, Alert, ActivityIndicator, Platform } from 'react-native'; // Added Platform
 import styled from 'styled-components/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
@@ -71,8 +71,60 @@ const UploadScreen = () => {
 
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+
+        let fileContent: string | null = null;
+
         setStatusMessage('Reading file...');
-        const fileContent = await FileSystem.readAsStringAsync(asset.uri);
+
+        if (Platform.OS === 'web' && asset.file) {
+          // Web platform: Use FileReader API
+          try {
+            fileContent = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                  resolve(reader.result);
+                } else {
+                  reject(new Error('Failed to read file as string.'));
+                }
+              };
+              reader.onerror = () => {
+                reject(reader.error || new Error('Unknown FileReader error'));
+              };
+              reader.readAsText(asset.file); // asset.file is the File object on web
+            });
+          } catch (webReadError: any) {
+            console.error("Web file read error:", webReadError);
+            Alert.alert('Error Reading File', `Could not read the selected file on web: ${webReadError.message}`);
+            setStatusMessage(`Error: ${webReadError.message}`);
+            setIsLoading(false);
+            return;
+          }
+        } else if (asset.uri) {
+          // Mobile platforms: Use FileSystem.readAsStringAsync
+          try {
+            fileContent = await FileSystem.readAsStringAsync(asset.uri);
+          } catch (mobileReadError: any) {
+            console.error("Mobile file read error:", mobileReadError);
+            Alert.alert('Error Reading File', `Could not read the selected file: ${mobileReadError.message}`);
+            setStatusMessage(`Error: ${mobileReadError.message}`);
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          Alert.alert('Error', 'Could not determine how to read the selected file. Asset information is missing.');
+          setStatusMessage('Error: Could not read file.');
+          setIsLoading(false);
+          return;
+        }
+
+        if (fileContent === null) {
+          // This case should ideally be caught by specific errors above, but as a fallback:
+          Alert.alert('Error', 'File content could not be read.');
+          setStatusMessage('Error: Failed to read file content.');
+          setIsLoading(false);
+          return;
+        }
 
         setStatusMessage('Validating file structure...');
         const ajv = new Ajv({ allErrors: true });
