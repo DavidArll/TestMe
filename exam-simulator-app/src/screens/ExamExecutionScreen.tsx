@@ -203,6 +203,18 @@ const ExamExecutionScreen = () => {
   const handleFinishExam = () => {
     if (!exam || !startTimeRef.current) return;
     const duration = Date.now() - startTimeRef.current;
+
+    console.log('[ExamExecutionScreen] Finishing exam. Data to pass:');
+    console.log('Exam Title:', JSON.stringify(exam?.title)); // Log title
+    console.log('Exam Questions (sample):', JSON.stringify(exam?.questions?.slice(0, 2))); // Log first 2 questions
+    console.log('User Answers:', JSON.stringify(userAnswers));
+    console.log('Duration (ms):', duration);
+
+    if (!exam || typeof userAnswers === 'undefined' || typeof duration === 'undefined') {
+      Alert.alert('Debug Error', 'Missing data before navigating to Results. Check console.');
+      return; // Prevent navigation if critical data is missing
+    }
+
     navigation.replace('Results', { exam, userAnswers, duration }); // Use replace to prevent going back to exam
   };
 
