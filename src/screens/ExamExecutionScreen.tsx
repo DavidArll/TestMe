@@ -232,6 +232,31 @@ const ExamExecutionScreen = () => {
   const questionMainText = getLangSpecificText(currentQuestion.question, primaryLang);
   const questionSubText = isMultilingual && secondaryLang ? getLangSpecificText(currentQuestion.question, secondaryLang, primaryLang) : null;
 
+  // Prepare optionsToRender for multiple-choice questions
+  let optionsToRender: OptionValue[] = [];
+
+  if (currentQuestion && currentQuestion.type === 'multiple-choice' && currentQuestion.options) {
+    if (Array.isArray(currentQuestion.options)) {
+      // Case 1: options is already OptionValue[] (e.g., ["Opt1", {"en": "Opt2_en", "es": "Opt2_es"}])
+      optionsToRender = currentQuestion.options as OptionValue[];
+    } else if (typeof currentQuestion.options === 'object' && currentQuestion.options[primaryLang] && Array.isArray(currentQuestion.options[primaryLang])) {
+      // Case 2: options is { es: string[], en: string[] }
+      optionsToRender = currentQuestion.options[primaryLang] as string[];
+    } else if (typeof currentQuestion.options === 'object') {
+      // Fallback for object type if primaryLang not found or not an array - try first available lang
+      const availableLangs = Object.keys(currentQuestion.options);
+      if (availableLangs.length > 0 && Array.isArray(currentQuestion.options[availableLangs[0]])) {
+          console.warn(`Options for primary language '${primaryLang}' not found or not an array. Using first available language: '${availableLangs[0]}'`);
+          optionsToRender = currentQuestion.options[availableLangs[0]] as string[];
+      } else {
+          console.warn(`Options for question ${currentQuestion.id} are in an unexpected object format or empty.`);
+      }
+    }
+     else {
+      console.warn(`Options for question ${currentQuestion.id} are in an unexpected format.`);
+    }
+  }
+
   return (
     <StyledContainer backgroundColor={theme.background} contentContainerStyle={{ paddingBottom: 20 }}>
       <ProgressText color={theme.text}>
@@ -247,21 +272,23 @@ const ExamExecutionScreen = () => {
         </SubtitleText>
       )}
 
-      {currentQuestion.type === 'multiple-choice' && currentQuestion.options && (
+      {currentQuestion.type === 'multiple-choice' && optionsToRender.length > 0 && (
         <View>
-          {(currentQuestion.options as OptionValue[]).map((optionItem: OptionValue, index: number) => {
+          {optionsToRender.map((optionItem: OptionValue, index: number) => {
             const optionMainText = getLangSpecificText(optionItem, primaryLang);
             const optionSubText = isMultilingual && secondaryLang ? getLangSpecificText(optionItem, secondaryLang, primaryLang) : null;
 
             let isSelected = false;
             if(selectedOption){
-                const selectedOptionMainText = getLangSpecificText(selectedOption, primaryLang);
-                isSelected = selectedOptionMainText === optionMainText;
+                // Robust comparison for selectedOption and optionItem (both can be string or LangSpecificText)
+                const selectedOptionText = getLangSpecificText(selectedOption, primaryLang);
+                const currentOptionText = getLangSpecificText(optionItem, primaryLang);
+                isSelected = selectedOptionText === currentOptionText;
             }
 
             return (
               <OptionContainer
-                key={index}
+                key={index} // Consider a more stable key if options can be reordered or have IDs
                 selected={isSelected}
                 onPress={() => handleSelectOption(optionItem)}
                 theme={theme}
