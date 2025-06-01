@@ -239,17 +239,40 @@ const ExamExecutionScreen = () => {
     if (Array.isArray(currentQuestion.options)) {
       // Case 1: options is already OptionValue[] (e.g., ["Opt1", {"en": "Opt2_en", "es": "Opt2_es"}])
       optionsToRender = currentQuestion.options as OptionValue[];
-    } else if (typeof currentQuestion.options === 'object' && currentQuestion.options[primaryLang] && Array.isArray(currentQuestion.options[primaryLang])) {
-      // Case 2: options is { es: string[], en: string[] }
-      optionsToRender = currentQuestion.options[primaryLang] as string[];
-    } else if (typeof currentQuestion.options === 'object') {
-      // Fallback for object type if primaryLang not found or not an array - try first available lang
-      const availableLangs = Object.keys(currentQuestion.options);
-      if (availableLangs.length > 0 && Array.isArray(currentQuestion.options[availableLangs[0]])) {
-          console.warn(`Options for primary language '${primaryLang}' not found or not an array. Using first available language: '${availableLangs[0]}'`);
-          optionsToRender = currentQuestion.options[availableLangs[0]] as string[];
+    }
+    else if (typeof currentQuestion.options === 'object' && !Array.isArray(currentQuestion.options)) {
+      // This handles the case: options: { "es": ["opt1_es", "opt2_es"], "en": ["opt1_en", "opt2_en"] }
+      const primaryLangOptionsArray = (currentQuestion.options as { [key: string]: string[] })[primaryLang];
+      const secondaryLangOptionsArray = (secondaryLang && (currentQuestion.options as { [key: string]: string[] })[secondaryLang])
+                                        ? (currentQuestion.options as { [key: string]: string[] })[secondaryLang]
+                                        : undefined;
+
+      if (Array.isArray(primaryLangOptionsArray)) {
+        optionsToRender = primaryLangOptionsArray.map((primaryOptText, index) => {
+          const optionObj: LangSpecificText = { [primaryLang]: primaryOptText };
+          if (isMultilingual && secondaryLang && Array.isArray(secondaryLangOptionsArray) && index < secondaryLangOptionsArray.length && secondaryLangOptionsArray[index]) {
+            optionObj[secondaryLang] = secondaryLangOptionsArray[index];
+          }
+          return optionObj; // This ensures optionItem in the map will be LangSpecificText
+        });
       } else {
-          console.warn(`Options for question ${currentQuestion.id} are in an unexpected object format or empty.`);
+        // Fallback if primary language options are not an array or not found
+        // Try to use the first available language array in the options object
+        const availableLangs = Object.keys(currentQuestion.options);
+        if (availableLangs.length > 0) {
+          const firstLangKey = availableLangs[0];
+          const firstLangOptions = (currentQuestion.options as { [key: string]: string[] })[firstLangKey];
+          if (Array.isArray(firstLangOptions)) {
+            optionsToRender = firstLangOptions.map(optText => ({ [firstLangKey]: optText } as LangSpecificText));
+            if (primaryLang !== firstLangKey) {
+                console.warn(`Options for primary language '${primaryLang}' not found or not an array for question ${currentQuestion.id}. Using first available language: '${firstLangKey}'.`);
+            }
+          } else {
+             console.warn(`Options for question ${currentQuestion.id} are in an unexpected object format for language ${firstLangKey}. Expected an array of strings.`);
+          }
+        } else {
+            console.warn(`Options for question ${currentQuestion.id} are an empty object.`);
+        }
       }
     }
      else {

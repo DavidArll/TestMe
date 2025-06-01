@@ -81,30 +81,65 @@ Exams are loaded from JSON files. The application expects a specific structure f
     *   `language` (object, optional): Specifies primary and optional secondary languages (e.g., `{ "primary": "en", "secondary": "es" }`).
     *   `includeAnswerKey` (boolean, optional): If true, allows the app to score the exam and show correct answers.
 
-*   **Example Question (Minimal):**
+*   **Example JSON Structure:**
     ```json
     {
-      "id": "q1",
-      "type": "multiple-choice",
-      "question": "What is 2+2?",
-      "options": ["3", "4", "5"],
-      "answerKey": "4"
-    }
-    ```
-    Or, for multilingual:
-    ```json
-    {
-      "id": "q2",
-      "type": "open-ended",
-      "question": {
-        "en": "Describe React Native.",
-        "es": "Describe React Native."
+      "title": "Multilingual Options Example Exam",
+      "language": {
+        "primary": "en",
+        "secondary": "es"
       },
-      "answerKey": {
-        "en": "A framework for building native apps using React."
-      }
+      "includeAnswerKey": true,
+      "questions": [
+        {
+          "id": "q1_mcq_multilingual_options",
+          "type": "multiple-choice",
+          "question": {
+            "en": "Which color is primary?",
+            "es": "¿Qué color es primario?"
+          },
+          "options": [
+            {
+              "en": "Red",
+              "es": "Rojo"
+            },
+            {
+              "en": "Green",
+              "es": "Verde"
+            },
+            {
+              "en": "Purple",
+              "es": "Morado"
+            }
+          ],
+          "answerKey": {
+            "en": "Red",
+            "es": "Rojo"
+          },
+          "explanation": {
+            "en": "Red is a primary color.",
+            "es": "El rojo es un color primario."
+          }
+        },
+        {
+          "id": "q2_open_ended",
+          "type": "open-ended",
+          "question": {
+            "en": "Describe the sky.",
+            "es": "Describe el cielo."
+          }
+        }
+      ]
     }
     ```
+    *   **Note on Multilingual Options:** For multiple-choice questions where each option itself needs to be multilingual (to provide subtitles or alternate language versions for each choice), the `options` field should be an array of objects. Each object in this array represents a single choice and should map language codes (e.g., "en", "es") to the translated text for that specific option. For instance:
+        ```json
+        "options": [
+          { "en": "Option A (English)", "es": "Opción A (Español)" },
+          { "en": "Option B (English)", "es": "Opción B (Español)" }
+        ]
+        ```
+        The schema also supports a simpler format for multilingual options where the `options` field is an object mapping language codes to arrays of strings (e.g., `"options": { "en": ["Opt1", "Opt2"], "es": ["Opción1", "Opción2"] }`). This format is suitable if individual options don't need their own distinct translations for a secondary display but rather the entire list of options changes per language.
 
 ## Project Structure
 

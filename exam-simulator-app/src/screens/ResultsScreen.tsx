@@ -442,11 +442,25 @@ const ResultsScreen = () => {
               <AnswerText color={theme.textMuted || theme.text}>
                 {userAnswerDisplay}
               </AnswerText>
+              {isMultilingual && secondaryLang && typeof userAnswers[question.id.toString()] === 'object' &&
+                getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang) !== userAnswerDisplay &&
+                getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang) !== "N/A" && (
+                <QuestionSubtitleText style={{ marginLeft: 10, fontSize: 13, color: theme.textMuted || theme.text }}>
+                  {getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang)}
+                </QuestionSubtitleText>
+              )}
 
               {exam.includeAnswerKey && correctAnswerDisplay && (
                 <>
                   <AnswerLabelText color={theme.text}>Correct Answer:</AnswerLabelText>
                   <AnswerText color={theme.textMuted || theme.text}>{correctAnswerDisplay}</AnswerText>
+                  {isMultilingual && secondaryLang && typeof question.answerKey === 'object' &&
+                    getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang) !== correctAnswerDisplay &&
+                    getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang) !== "N/A" && (
+                    <QuestionSubtitleText style={{ marginLeft: 10, fontSize: 13, color: theme.textMuted || theme.text }}>
+                      {getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang)}
+                    </QuestionSubtitleText>
+                  )}
                   {userAnswerValue !== undefined && (
                     <ResultIndicatorText theme={theme} isCorrect={isCorrect}>
                         {isCorrect ? 'Correct' : 'Incorrect'}
