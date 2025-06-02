@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('Failed to load user from storage', error);
         // Optionally set currentUser to null explicitly if loading fails critically
-        // setCurrentUser(null);
+        // setCurrentUser(null); 
       } finally {
         setIsLoading(false);
       }
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const usersJson = await AsyncStorage.getItem(USERS_STORAGE_KEY);
       let users: User[] = usersJson ? JSON.parse(usersJson) : [];
-
+      
       if (users.find(u => u.username === username)) {
         console.log('User already exists');
         setIsLoading(false);

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { lightTheme, darkTheme } from '../theme/theme'; 
 
 export interface Theme {
   mode: 'light' | 'dark';
@@ -23,7 +23,7 @@ interface ThemeContextProps {
 }
 
 const defaultThemeContextValue: ThemeContextProps = {
-    theme: lightTheme,
+    theme: lightTheme, 
     toggleTheme: () => {
         console.log("ThemeProvider not yet initialized or toggleTheme not implemented");
     },
@@ -63,13 +63,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   };
 
   const themeToProvide = currentThemeMode === 'light' ? lightTheme : darkTheme;
-
+  
   // Ensure the theme object's mode property is consistent with the currentThemeMode state.
   // This is a safeguard. In theme.ts, mode is already set.
   if (themeToProvide.mode !== currentThemeMode) {
       console.warn(`Theme object mode (${themeToProvide.mode}) does not match currentThemeMode (${currentThemeMode}). Ensure theme objects in theme.ts include the 'mode' property correctly.`);
       // Optionally, force consistency: (Not ideal, better to fix theme.ts)
-      // themeToProvide.mode = currentThemeMode;
+      // themeToProvide.mode = currentThemeMode; 
   }
 
 

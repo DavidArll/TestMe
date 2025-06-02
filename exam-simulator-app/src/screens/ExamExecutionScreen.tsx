@@ -4,8 +4,8 @@ import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'reac
 import styled from 'styled-components/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeContext, Theme } from '../context/ThemeContext';
-import { Exam, Question, OptionValue, LangSpecificText } from '../types/exam';
+import { ThemeContext, Theme } from '../context/ThemeContext'; 
+import { Exam, Question, OptionValue, LangSpecificText } from '../types/exam'; 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from './ResultsScreen'; // Using RootStackParamList from ResultsScreen for now
 
@@ -72,8 +72,8 @@ const TextInputStyled = styled.TextInput<{ theme: Theme }>`
   padding: 10px;
   border-radius: 5px;
   font-size: 16px;
-  min-height: 100px;
-  text-align-vertical: top;
+  min-height: 100px; 
+  text-align-vertical: top; 
   margin-bottom: 20px;
   margin-horizontal: 20px; /* Added horizontal margin */
 `;
@@ -81,7 +81,7 @@ const NavigationControlsContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
   margin-top: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 40px; 
   padding-horizontal: 20px; /* Added horizontal padding */
 `;
 const NavButton = styled.TouchableOpacity<{ theme: Theme, disabled?: boolean }>`
@@ -89,8 +89,8 @@ const NavButton = styled.TouchableOpacity<{ theme: Theme, disabled?: boolean }>`
   padding: 15px 25px;
   border-radius: 5px;
   opacity: ${props => props.disabled ? 0.6 : 1};
-  min-width: 120px;
-  align-items: center;
+  min-width: 120px; 
+  align-items: center; 
 `;
 const NavButtonText = styled.Text<{ theme: Theme, disabled?: boolean }>` /* Added disabled prop */
   color: ${props => props.disabled ? (props.theme.mode === 'dark' ? props.theme.textMuted : '#a0a0a0') : props.theme.buttonText};
@@ -123,7 +123,7 @@ const ExamExecutionScreen = () => {
         const foundExam = allExams.find(e => e.id === examId);
         if (foundExam) {
           setExam(foundExam);
-          setUserAnswers({});
+          setUserAnswers({}); 
           startTimeRef.current = Date.now();
         } else {
           Alert.alert('Error', 'Exam not found.');
@@ -214,7 +214,7 @@ const ExamExecutionScreen = () => {
       Alert.alert('Debug Error', 'Missing data before navigating to Results. Check console.');
       return; // Prevent navigation if critical data is missing
     }
-
+    
     navigation.replace('Results', { exam, userAnswers, duration }); // Use replace to prevent going back to exam
   };
 
@@ -233,18 +233,18 @@ const ExamExecutionScreen = () => {
   const questionSubText = isMultilingual && secondaryLang ? getLangSpecificText(currentQuestion.question, secondaryLang, primaryLang) : null;
 
   // Prepare optionsToRender for multiple-choice questions
-  let optionsToRender: OptionValue[] = [];
+  let optionsToRender: OptionValue[] = []; 
 
   if (currentQuestion && currentQuestion.type === 'multiple-choice' && currentQuestion.options) {
     if (Array.isArray(currentQuestion.options)) {
       // Case 1: options is already OptionValue[] (e.g., ["Opt1", {"en": "Opt2_en", "es": "Opt2_es"}])
-      optionsToRender = currentQuestion.options as OptionValue[];
-    }
+      optionsToRender = currentQuestion.options as OptionValue[]; 
+    } 
     else if (typeof currentQuestion.options === 'object' && !Array.isArray(currentQuestion.options)) {
       // This handles the case: options: { "es": ["opt1_es", "opt2_es"], "en": ["opt1_en", "opt2_en"] }
       const primaryLangOptionsArray = (currentQuestion.options as { [key: string]: string[] })[primaryLang];
-      const secondaryLangOptionsArray = (secondaryLang && (currentQuestion.options as { [key: string]: string[] })[secondaryLang])
-                                        ? (currentQuestion.options as { [key: string]: string[] })[secondaryLang]
+      const secondaryLangOptionsArray = (secondaryLang && (currentQuestion.options as { [key: string]: string[] })[secondaryLang]) 
+                                        ? (currentQuestion.options as { [key: string]: string[] })[secondaryLang] 
                                         : undefined;
 
       if (Array.isArray(primaryLangOptionsArray)) {
@@ -300,7 +300,7 @@ const ExamExecutionScreen = () => {
           {optionsToRender.map((optionItem: OptionValue, index: number) => {
             const optionMainText = getLangSpecificText(optionItem, primaryLang);
             const optionSubText = isMultilingual && secondaryLang ? getLangSpecificText(optionItem, secondaryLang, primaryLang) : null;
-
+            
             let isSelected = false;
             if(selectedOption){
                 // Robust comparison for selectedOption and optionItem (both can be string or LangSpecificText)

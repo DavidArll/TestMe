@@ -112,7 +112,7 @@ Exams are loaded from JSON files. The application expects a specific structure f
               "es": "Morado"
             }
           ],
-          "answerKey": {
+          "answerKey": { 
             "en": "Red",
             "es": "Rojo"
           },

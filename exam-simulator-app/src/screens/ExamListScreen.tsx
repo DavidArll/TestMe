@@ -39,8 +39,8 @@ const AddNewButton = styled.TouchableOpacity`
 `;
 
 const ButtonText = styled.Text<{ theme: Theme }>`
-  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-                     ? '#FFFFFF'
+  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark') 
+                     ? '#FFFFFF' 
                      : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF')};
   font-size: 16px;
   font-weight: bold;
@@ -60,7 +60,7 @@ const ExamItemContainer = styled.TouchableOpacity<{ borderColor: string, cardBac
 const ExamTitle = styled.Text<{ color: string }>`
   font-size: 18px;
   color: ${props => props.color};
-  flex: 1;
+  flex: 1; 
   margin-right: 10px; /* Added margin to prevent text touching icon */
 `;
 
@@ -73,7 +73,7 @@ const EmptyListText = styled.Text<{ color: string }>`
 `;
 
 const DeleteButtonView = styled.TouchableOpacity`
-  padding: 5px;
+  padding: 5px; 
 `;
 
 
@@ -131,18 +131,18 @@ const ExamListScreen = () => {
             } catch (e) {
               Alert.alert('Error', 'Failed to delete exam.');
               console.error(e);
-              loadExams();
+              loadExams(); 
             }
           },
         },
       ]
     );
   };
-
+  
   const renderItem = ({ item }: { item: Exam }) => (
-    <ExamItemContainer
-        onPress={() => handleSelectExam(item)}
-        theme={theme}
+    <ExamItemContainer 
+        onPress={() => handleSelectExam(item)} 
+        theme={theme} 
         borderColor={theme.borderColor}
         cardBackgroundColor={theme.cardBackground} // Pass cardBackground
     >
@@ -153,7 +153,7 @@ const ExamListScreen = () => {
     </ExamItemContainer>
   );
 
-  if (isLoading && !exams.length) {
+  if (isLoading && !exams.length) { 
     return (
       <Container backgroundColor={theme.background} style={{justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color={theme.primary} />
@@ -167,14 +167,14 @@ const ExamListScreen = () => {
         <TitleText color={theme.text}>My Exams</TitleText>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity onPress={toggleTheme} style={{ paddingHorizontal: 10, paddingVertical: 5 }}>
-                <MaterialCommunityIcons
-                  name={theme.mode === 'dark' ? "weather-sunny" : "weather-night"}
-                  size={26}
-                  color={theme.text}
+                <MaterialCommunityIcons 
+                  name={theme.mode === 'dark' ? "weather-sunny" : "weather-night"} 
+                  size={26} 
+                  color={theme.text} 
                 />
               </TouchableOpacity>
               <AddNewButton onPress={() => navigation.navigate('Upload')}>
-                  <ButtonText theme={theme}>Add New</ButtonText>
+                  <ButtonText theme={theme}>Add New</ButtonText> 
               </AddNewButton>
             </View>
       </HeaderView>
@@ -184,8 +184,8 @@ const ExamListScreen = () => {
         keyExtractor={item => item.id}
         ListEmptyComponent={<EmptyListText color={theme.text}>No exams found. Tap "Add New" to upload an exam.</EmptyListText>}
         contentContainerStyle={{ flexGrow: 1, paddingTop: 5, paddingBottom: 10 }} // Added padding top/bottom
-        refreshing={isLoading}
-        onRefresh={loadExams}
+        refreshing={isLoading} 
+        onRefresh={loadExams} 
       />
     </Container>
   );

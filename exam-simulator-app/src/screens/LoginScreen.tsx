@@ -52,8 +52,8 @@ const StyledButton = styled.TouchableOpacity<{ theme: Theme, disabled?: boolean 
 `;
 
 const ButtonText = styled.Text<{ theme: Theme }>`
-  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-                   ? '#FFFFFF'
+  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark') 
+                   ? '#FFFFFF' 
                    : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF')};
   font-size: 16px;
   font-weight: bold;

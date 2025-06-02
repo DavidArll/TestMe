@@ -15,6 +15,9 @@ COPY package*.json ./
 # Using --legacy-peer-deps to handle potential conflicts (as seen in local setup)
 RUN npm install --legacy-peer-deps
 
+# Install/ensure critical Expo packages and related dependencies
+RUN npm install --legacy-peer-deps react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context react-dom react-native-web @react-native-async-storage/async-storage expo-document-picker expo-file-system expo-sharing
+
 # Copy the rest of the application code into the container
 COPY . .
 
@@ -26,8 +29,8 @@ COPY . .
 EXPOSE 19000 19001 19002 8081
 
 # Set the default command to start the Expo development server with tunnel option
-# Using npx to ensure it uses the project's local version of expo if available,
+# Using npx to ensure it uses the project's local version of expo if available, 
 # falling back to global if not (though global is installed).
-# CMD ["expo", "start", "--tunnel"]
+# CMD ["expo", "start", "--tunnel"] 
 # Using npx expo start is generally preferred for invoking the local version of Expo CLI tied to the project's SDK version.
 CMD ["npx", "expo", "start", "--tunnel"]

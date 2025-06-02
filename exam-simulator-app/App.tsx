@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider> 
       <ThemeProvider> { /* ThemeProvider might be outer or inner depending on needs */}
         <AuthProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>

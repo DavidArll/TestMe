@@ -48,8 +48,8 @@ const ActionButton = styled.TouchableOpacity<{ theme: Theme }>` // Added theme p
 `;
 
 const ButtonText = styled.Text<{ theme: Theme }>`
-  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-                   ? '#FFFFFF'
+  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark') 
+                   ? '#FFFFFF' 
                    : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF')};
   font-size: 14px;
   font-weight: bold;
@@ -70,7 +70,7 @@ const ExamItemContainer = styled.TouchableOpacity<{ borderColor: string, theme: 
 const ExamTitle = styled.Text<{ color: string }>`
   font-size: 18px;
   color: ${props => props.color};
-  flex: 1;
+  flex: 1; 
 `;
 
 const DeleteButtonView = styled.TouchableOpacity`
@@ -149,7 +149,7 @@ const UserDashboardScreen: React.FC = () => {
             try {
               // Optimistically update UI
               setUserExams(prevExams => prevExams.filter(exam => exam.id !== examId));
-
+              
               // Update the global list in AsyncStorage
               const allExamsJson = await AsyncStorage.getItem('exams');
               let allExams: Exam[] = allExamsJson ? JSON.parse(allExamsJson) : [];
@@ -168,9 +168,9 @@ const UserDashboardScreen: React.FC = () => {
   };
 
   const renderExamItem = ({ item }: { item: Exam }) => (
-    <ExamItemContainer
+    <ExamItemContainer 
         onPress={() => handleSelectExam(item)}
-        theme={theme}
+        theme={theme} 
         borderColor={theme.borderColor || theme.accent} // Fallback for borderColor
     >
       <View style={{flex: 1, marginRight: 8}}>
@@ -184,7 +184,7 @@ const UserDashboardScreen: React.FC = () => {
   );
 
   // This condition handles initial loading of auth state AND if user becomes null (logged out)
-  if (authLoading || !currentUser) {
+  if (authLoading || !currentUser) { 
     return (
         <Container backgroundColor={theme.background}>
             <ActivityIndicator size="large" color={theme.primary} style={{flex: 1}} />
@@ -198,10 +198,10 @@ const UserDashboardScreen: React.FC = () => {
         <TitleText color={theme.text}>My Dashboard</TitleText>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity onPress={toggleTheme} style={{ paddingHorizontal: 10 }}>
-                <MaterialCommunityIcons
-                    name={theme.mode === 'dark' ? "weather-sunny" : "weather-night"}
-                    size={26}
-                    color={theme.text}
+                <MaterialCommunityIcons 
+                    name={theme.mode === 'dark' ? "weather-sunny" : "weather-night"} 
+                    size={26} 
+                    color={theme.text} 
                 />
             </TouchableOpacity>
             <ActionButton theme={theme} onPress={() => navigation.navigate('Upload')}>
@@ -212,7 +212,7 @@ const UserDashboardScreen: React.FC = () => {
             </ActionButton>
         </View>
       </HeaderView>
-
+      
       {isLoading && userExams.length === 0 ? ( // Show loader if loading exams and list is empty
          <ActivityIndicator size="large" color={theme.primary} style={{marginTop: 20, flex:1}}/>
       ) : (

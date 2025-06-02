@@ -68,7 +68,7 @@ export const examSchema: JSONSchemaType<Exam> = {
             ]
             // No `nullable: true` here as {type: "null"} is in oneOf
           },
-          answerKey: {
+          answerKey: { 
              oneOf: [
                 { type: "string", minLength: 1 },
                 multilingualTextSchema,
@@ -85,7 +85,7 @@ export const examSchema: JSONSchemaType<Exam> = {
           }
         },
         required: ["id", "type", "question"],
-        additionalProperties: true
+        additionalProperties: true 
       } as any // Using 'any' for items to simplify complex conditional schema for AJV TS integration
     }
   },

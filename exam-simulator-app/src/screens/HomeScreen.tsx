@@ -36,8 +36,8 @@ const AuthButton = styled.TouchableOpacity<{ theme: Theme }>` // Added theme pro
 `;
 
 const AuthButtonText = styled.Text<{ theme: Theme }>`
-  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-                   ? '#FFFFFF'
+  color: ${props => (props.theme.primary === props.theme.background && props.theme.mode === 'dark') 
+                   ? '#FFFFFF' 
                    : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF')};
   font-size: 14px;
   font-weight: bold;
@@ -115,9 +115,9 @@ const HomeScreen: React.FC = () => {
   };
 
   const renderExamItem = ({ item }: { item: Exam }) => (
-    <ExamItemContainer
+    <ExamItemContainer 
       onPress={() => handleSelectExam(item)}
-      theme={theme}
+      theme={theme} 
       borderColor={theme.borderColor || theme.accent} // Fallback for borderColor
     >
       <ExamTitle color={theme.text}>{item.title}</ExamTitle>
@@ -139,7 +139,7 @@ const HomeScreen: React.FC = () => {
             </AuthButton>
         )}
       </HeaderView>
-
+      
       {isLoading && publicExams.length === 0 ? (
         <ActivityIndicator size="large" color={theme.primary} style={{marginTop: 20, flex: 1}}/>
       ) : (

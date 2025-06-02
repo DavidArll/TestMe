@@ -78,7 +78,7 @@ const AnswerLabelText = styled.Text<{ color: string }>`
 const AnswerText = styled.Text<{ color: string }>`
   font-size: 15px;
   color: ${props => props.color};
-  margin-left: 10px;
+  margin-left: 10px; 
   margin-bottom: 5px;
 `;
 const ResultIndicatorText = styled.Text<{ theme: Theme; isCorrect: boolean }>`
@@ -96,7 +96,7 @@ const ScoreText = styled.Text<{ color: string }>`
 `;
 const ButtonContainer = styled.View`
   margin-top: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 30px; 
   flex-direction: row;
   justify-content: space-around;
 `;
@@ -118,8 +118,8 @@ const ButtonText = styled.Text<{ theme: Theme; secondary?: boolean; disabled?: b
     }
     // For primary, non-disabled button, text should contrast with theme.primary background
     // This logic is similar to other ButtonText components (e.g., UploadScreen)
-    return (props.theme.primary === props.theme.background && props.theme.mode === 'dark')
-           ? '#FFFFFF'
+    return (props.theme.primary === props.theme.background && props.theme.mode === 'dark') 
+           ? '#FFFFFF' 
            : (props.theme.mode === 'dark' ? props.theme.background : '#FFFFFF');
   }};
   font-size: 16px;
@@ -151,7 +151,7 @@ const ResultsScreen = () => {
   const route = useRoute<ResultsScreenRouteProp>();
 
   console.log('[ResultsScreen] Received route params:', JSON.stringify(route.params, null, 2));
-
+  
   // Handle case where params might be undefined if navigated to incorrectly
   if (!route.params) {
     console.error('[ResultsScreen] Error: route.params is undefined!');
@@ -167,7 +167,7 @@ const ResultsScreen = () => {
           </StyledContainer>
       );
   }
-
+  
   const { exam, userAnswers, duration } = route.params; // Assuming params are guaranteed by navigation call (already checked by !route.params)
 
   console.log('[ResultsScreen] Destructured exam title:', JSON.stringify(exam?.title));
@@ -209,14 +209,14 @@ const ResultsScreen = () => {
 
   const getStatusForExport = (question: Question, userAnswerValue: string | OptionValue | undefined): string => {
     const isAnswerKeyAvailable = exam.includeAnswerKey && question.answerKey !== undefined && question.answerKey !== null;
-
+    
     if (typeof userAnswers[question.id.toString()] === 'undefined') {
         return "Not Answered";
     }
     if (!isAnswerKeyAvailable) {
         return "Not Scored";
     }
-
+    
     const userAnswerDisplay = getLangSpecificText(userAnswerValue, primaryLang);
     const correctAnswerDisplay = getLangSpecificText(question.answerKey!, primaryLang);
 
@@ -236,12 +236,12 @@ const ResultsScreen = () => {
 
   const convertResultsToCsv = (data: any): string => {
     const csvRows: string[][] = [];
-
+    
     csvRows.push([escapeCsvField('Exam Title:'), escapeCsvField(data.examTitle)]);
     csvRows.push([escapeCsvField('Exam Date:'), escapeCsvField(data.examDate)]);
     csvRows.push([escapeCsvField('Duration:'), escapeCsvField(data.durationFormatted)]);
     csvRows.push([escapeCsvField('Score:'), escapeCsvField(data.score)]);
-    csvRows.push([]);
+    csvRows.push([]); 
 
     const questionHeaders = ['Question No.', 'Question Text', 'User Answer', 'Correct Answer', 'Status'];
     csvRows.push(questionHeaders.map(escapeCsvField));
@@ -269,7 +269,7 @@ const ResultsScreen = () => {
 
       if (format === 'json') {
         // Create a deep copy of the original exam object to avoid modifying the state version
-        const examCopy: Exam = JSON.parse(JSON.stringify(exam));
+        const examCopy: Exam = JSON.parse(JSON.stringify(exam)); 
 
         // Add user answers to each question in the copy
         examCopy.questions.forEach(question => {
@@ -278,7 +278,7 @@ const ResultsScreen = () => {
           // We store the raw userAnswerValue (which can be string or LangSpecificText for MCQs)
           // This preserves the original answer structure if it was complex.
           // @ts-ignore because we are dynamically adding a property
-          question.userProvidedAnswer = userAnswerValue !== undefined ? userAnswerValue : null;
+          question.userProvidedAnswer = userAnswerValue !== undefined ? userAnswerValue : null; 
         });
 
         // Prepare the final export object
@@ -292,7 +292,7 @@ const ResultsScreen = () => {
             // Could also include a summary of statuses per question if desired, but keep simple for now
           }
         };
-
+        
         contentString = JSON.stringify(exportData, null, 2);
         fileName = `${safeExamTitle}_results_${dateSuffix}.json`;
         mimeType = 'application/json';
@@ -353,7 +353,7 @@ const ResultsScreen = () => {
               return; // Exit if no valid directory
           }
           await FileSystem.writeAsStringAsync(fileUri, contentString, { encoding: FileSystem.EncodingType.UTF8 });
-
+          
           if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(fileUri, { mimeType, dialogTitle: `Share ${exam.title} Results` });
           } else {
@@ -371,7 +371,7 @@ const ResultsScreen = () => {
         Alert.alert("Export Preparation Error", `Failed to prepare data for export: ${error.message}`);
     }
   };
-
+  
   const handleExportResults = () => {
     Alert.alert(
       "Export Results",
@@ -386,7 +386,7 @@ const ResultsScreen = () => {
   };
 
   const handleDone = () => {
-    navigation.pop();
+    navigation.pop(); 
   };
 
   return (
@@ -410,7 +410,7 @@ const ResultsScreen = () => {
         {exam.questions.map((question, index) => {
           const userAnswerValue = userAnswers[question.id.toString()];
           const userAnswerDisplay = userAnswerValue !== undefined ? getLangSpecificText(userAnswerValue, primaryLang, secondaryLang) : "No answer provided";
-
+          
           let isCorrect = false;
           let correctAnswerDisplay: string | null = null;
 
@@ -442,8 +442,8 @@ const ResultsScreen = () => {
               <AnswerText color={theme.textMuted || theme.text}>
                 {userAnswerDisplay}
               </AnswerText>
-              {isMultilingual && secondaryLang && typeof userAnswers[question.id.toString()] === 'object' &&
-                getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang) !== userAnswerDisplay &&
+              {isMultilingual && secondaryLang && typeof userAnswers[question.id.toString()] === 'object' && 
+                getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang) !== userAnswerDisplay && 
                 getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang) !== "N/A" && (
                 <QuestionSubtitleText style={{ marginLeft: 10, fontSize: 13, color: theme.textMuted || theme.text }}>
                   {getLangSpecificText(userAnswers[question.id.toString()] as LangSpecificText, secondaryLang, primaryLang)}
@@ -454,8 +454,8 @@ const ResultsScreen = () => {
                 <>
                   <AnswerLabelText color={theme.text}>Correct Answer:</AnswerLabelText>
                   <AnswerText color={theme.textMuted || theme.text}>{correctAnswerDisplay}</AnswerText>
-                  {isMultilingual && secondaryLang && typeof question.answerKey === 'object' &&
-                    getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang) !== correctAnswerDisplay &&
+                  {isMultilingual && secondaryLang && typeof question.answerKey === 'object' && 
+                    getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang) !== correctAnswerDisplay && 
                     getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang) !== "N/A" && (
                     <QuestionSubtitleText style={{ marginLeft: 10, fontSize: 13, color: theme.textMuted || theme.text }}>
                       {getLangSpecificText(question.answerKey as LangSpecificText, secondaryLang, primaryLang)}
@@ -471,10 +471,10 @@ const ResultsScreen = () => {
             </QuestionBlock>
           );
         })}
-
+        
         <ButtonContainer>
              <StyledButton theme={theme} onPress={handleExportResults} secondary>
-                <ButtonText theme={theme} secondary>Export</ButtonText>
+                <ButtonText theme={theme} secondary>Export</ButtonText> 
             </StyledButton>
             <StyledButton theme={theme} onPress={handleDone}>
                 <ButtonText theme={theme}>Done</ButtonText>

@@ -2,8 +2,8 @@
 
 // Defines a structure for text that can be a simple string or an object
 // where keys are language codes (e.g., "en", "es") and values are strings.
-export type LangSpecificText = {
-  [langCode: string]: string;
+export type LangSpecificText = { 
+  [langCode: string]: string; 
 };
 
 // Defines the value of a selectable option or an answer key.
@@ -22,15 +22,15 @@ export interface Question {
   // 2. An object where keys are language codes and values are arrays of simple strings.
   // 3. Null or undefined (especially for open-ended questions).
   options?: OptionValue[] | { [langCode: string]: string[] } | null;
-
+  
   // The correct answer for the question. Can be string, LangSpecificText, null, or undefined.
-  answerKey?: OptionValue | null;
-
+  answerKey?: OptionValue | null; 
+  
   // Optional explanation for the question's answer, can be multilingual.
   explanation?: string | LangSpecificText | null;
 
   // Allows for other properties that might be dynamically added (e.g., userProvidedAnswer for exports).
-  [key: string]: any;
+  [key: string]: any; 
 }
 
 // Interface for the main Exam structure.
@@ -46,5 +46,5 @@ export interface Exam {
   includeAnswerKey?: boolean | null;
   questions: Question[];
   // Allow any other top-level properties for future extensions or custom tags from original JSON
-  [key: string]: any;
+  [key: string]: any; 
 }

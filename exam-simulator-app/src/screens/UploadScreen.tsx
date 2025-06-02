@@ -42,14 +42,14 @@ const UploadScreen = () => {
   const ButtonText = styled.Text`
     color: ${(props) => { // props here are the Text component's own props, not { theme: ... }
         // Logic for color based on the lexically available 'theme' object
-        return (theme.primary === theme.background && theme.mode === 'dark')
-               ? '#FFFFFF'
+        return (theme.primary === theme.background && theme.mode === 'dark') 
+               ? '#FFFFFF' 
                : (theme.mode === 'dark' ? theme.background : '#FFFFFF');
     }};
     font-size: 16px;
     font-weight: bold;
   `;
-
+  
   const StatusText = styled.Text`
     color: ${theme.text};
     margin-top: 10px;
@@ -62,7 +62,7 @@ const UploadScreen = () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/json',
-        copyToCacheDirectory: true,
+        copyToCacheDirectory: true, 
       });
 
       if (result.canceled) {
@@ -73,7 +73,7 @@ const UploadScreen = () => {
 
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
-
+        
         let fileContent: string | null = null;
 
         setStatusMessage('Reading file...');
@@ -124,7 +124,7 @@ const UploadScreen = () => {
           setIsLoading(false);
           return;
         }
-
+            
         setStatusMessage('Validating file structure...');
         const ajv = new Ajv({ allErrors: true });
         let parsedExamForValidation;
@@ -163,8 +163,8 @@ const UploadScreen = () => {
             const question = validatedExam.questions[i];
             const questionIdentifier = typeof question.question === 'string' ? question.question : (question.question && Object.keys(question.question).length > 0 ? question.question[Object.keys(question.question)[0]] : `Question ${i+1}`) || `Question ${i+1}`;
             if (question.type === 'multiple-choice') {
-                if (!question.options ||
-                    (Array.isArray(question.options) && question.options.length === 0) ||
+                if (!question.options || 
+                    (Array.isArray(question.options) && question.options.length === 0) || 
                     (typeof question.options === 'object' && !Array.isArray(question.options) && Object.keys(question.options).length === 0) ) {
                     Alert.alert('Invalid Question', `Question "${questionIdentifier}" (at index ${i}) is multiple-choice but has no options or empty options.`);
                     setStatusMessage('Error: Multiple-choice question missing options.');
@@ -173,19 +173,19 @@ const UploadScreen = () => {
                 }
             }
         }
-
+        
         const examWithId: Exam = { ...validatedExam, id: Date.now().toString() };
 
         setStatusMessage('Saving exam...');
         const existingExamsRaw = await AsyncStorage.getItem('exams');
         const existingExams: Exam[] = existingExamsRaw ? JSON.parse(existingExamsRaw) : [];
-
+        
         existingExams.push(examWithId);
         await AsyncStorage.setItem('exams', JSON.stringify(existingExams));
 
         setStatusMessage('Exam uploaded successfully!');
         Alert.alert('Success', 'Exam uploaded and saved!');
-        navigation.navigate('ExamList');
+        navigation.navigate('ExamList'); 
       }
     } catch (error: any) {
       console.error(error);
@@ -200,7 +200,7 @@ const UploadScreen = () => {
     <Container>
       <TitleText>Upload Exam File</TitleText>
       <StyledButton onPress={handleFileUpload} disabled={isLoading}>
-        <ButtonText>Select JSON File</ButtonText>
+        <ButtonText>Select JSON File</ButtonText> 
       </StyledButton>
       {isLoading && <ActivityIndicator size="large" color={theme.primary} />}
       {statusMessage ? <StatusText>{statusMessage}</StatusText> : null}
